@@ -1,0 +1,84 @@
+{
+	Tools = ordered() {
+		METADATA_CAMERA = Camera3D {
+			CtrlWZoom = false,
+			NameSet = true,
+			CurrentSettings = 6,
+			CustomData = {
+				Settings = {
+					[1] = {
+						Tools = ordered() {
+							Camera3D1_9 = Camera3D {
+								Inputs = {
+									ApertureW = Input { Value = 0.831496062992126 },
+									AoV = Input { Value = 19.2642683071402 },
+									["Stereo.Mode"] = Input { Value = FuID { "OffAxis" } },
+									["MtlStdInputs.MaterialID"] = Input { Value = 1 },
+									ApertureH = Input { Value = 0.467716535433071 },
+									FilmGate = Input { Value = FuID { "BMD_URSA_4K_16x9" } },
+									["SurfacePlaneInputs.ObjectID.ObjectID"] = Input { Value = 1 }
+								},
+								CtrlWZoom = false,
+								NameSet = true,
+								ViewInfo = OperatorInfo { Pos = { 550, 16.5 } },
+								CustomData = {
+								}
+							}
+						}
+					},
+				}
+			},
+			Inputs = {
+				["Transform3DOp.Translate.X"] = Input {
+					Value = 38.3429946899414,
+					Expression = "self.ImageInput.Metadata.Translate.X",
+				},
+				["Transform3DOp.Translate.Y"] = Input {
+					Value = -4.28596878051758,
+					Expression = "self.ImageInput.Metadata.Translate.Y",
+				},
+				["Transform3DOp.Translate.Z"] = Input {
+					Value = -156.62385559082,
+					Expression = "self.ImageInput.Metadata.Translate.Z",
+				},
+				["Transform3DOp.Rotate.X"] = Input {
+					Value = -163.419545920138,
+					Expression = "self.ImageInput.Metadata.Rotate.X",
+				},
+				["Transform3DOp.Rotate.Y"] = Input {
+					Value = 13.444539220901,
+					Expression = "self.ImageInput.Metadata.Rotate.Y",
+				},
+				["Transform3DOp.Rotate.Z"] = Input {
+					Value = 180,
+					Expression = "self.ImageInput.Metadata.Rotate.Z",
+				},
+				AovType = Input { Value = 1, },
+				AoV = Input {
+					Value = 10.2855281829834,
+					Expression = "self.ImageInput.Metadata['cameraFov']",
+				},
+				FLength = Input { Value = 53.2694493014464, },
+				PlaneOfFocus = Input {
+					Value = 168.023406982422,
+					Expression = "self.ImageInput.Metadata['cameraTargetDistance']",
+				},
+				["Stereo.Mode"] = Input { Value = FuID { "OffAxis" }, },
+				FilmBack = Input { Value = 1, },
+				FilmGate = Input { Value = FuID { "HD" }, },
+				ApertureW = Input { Value = 0.3775, },
+				ApertureH = Input { Value = 0.2123, },
+				ControlVis = Input { Value = 1, },
+				PlaneOfFocusVis = Input { Value = 1, },
+				ImagePlaneEnabled = Input { Value = 0, },
+				["SurfacePlaneInputs.ObjectID.ObjectID"] = Input { Value = 1, },
+				ImageInput = Input {
+					SourceOp = "vRayCameraExtractor1_3",
+					Source = "Output",
+				},
+				["MtlStdInputs.MaterialID"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 550, 445.5 } },
+		}
+	}
+}

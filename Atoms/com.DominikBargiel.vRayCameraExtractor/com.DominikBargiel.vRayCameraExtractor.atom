@@ -1,0 +1,22 @@
+Atom {
+	Name = "vRayCameraExtractor",
+	Category = "Tools/3D",
+	Author = "Dominik Bargiel",
+	Version = 1.1,
+	Date = {2026, 1, 8},
+	Description = [[Creating a Fusion camera from render image metadata is efficient and relatively error-proof. The vRayCameraExtractor Fuse extracts the transformation matrix values from the metadata's comma-separated list, if necessary, applies the transformations using the correct ZXY rotation order, and provides the Rotations and Translations in a more easily-accessed table format.
+A Canera3D Default setting file has been added, which has been configured with expressions to read the metadata loaded in the S6 settings. All you need to do is switch the camera to S6 and connect the RS Camera Extractor into the Image Input. 
+
+Macros/vRay/vRayCameraExtractor_Camera.setting was added that reads the values from the node.]],
+	Donation = {
+		URL = [[]],
+		Amount = "0",
+	},
+
+	Deploy = {
+		"Fuses/Metadata/vRayCameraExtractor.fuse",
+		"Macros/vRay/vRayCameraExtractor_Camera.setting",
+		"Modules/Lua/matrix.lua",
+		"Modules/Lua/matrixutils.lua",
+	},
+}

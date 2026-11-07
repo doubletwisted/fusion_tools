@@ -1,0 +1,240 @@
+{
+    Event{
+        Action = 'Drag_Drop',
+        Targets = {
+            FuView = {
+                Execute = _Lua [=[
+-- Define supported file extensions
+local movieext = {
+    mp4 = true,
+    mov = true,
+    avi = true,
+    mxf = true,
+    wmv = true,
+    mkv = true
+}
+
+local seqext = {
+    exr = true,
+    png = true,
+    jpg = true,
+    jpeg = true,
+    tif = true,
+    tiff = true
+}
+
+-- Check if a file is a sequence by examining its extension and name pattern
+function IsSequenceFile(filename)
+    -- Get the extension
+    local ext = string.lower(filename:match("%.([^%.]+)$") or "")
+    
+    -- Check if it's a supported sequence extension and has a frame number pattern
+    -- Look for patterns like .0001.exr or _0001.exr
+    if seqext[ext] and (filename:match("%.%d+%.[^%.]+$") or filename:match("_%d+%.[^%.]+$")) then
+        return true
+    end
+    return false
+end
+
+-- Get file extension
+function GetFileExtension(filePath)
+    return string.lower(filePath:match("%.([^%.]+)$") or "")
+end
+
+-- Create a loader for a file
+function CreateLoader(comp, clipPath, fileType)
+    -- Deselect current tool before creating new loader
+    comp:SetActiveTool(nil)
+    
+    local loader = comp:AddTool('Loader', -32768, -32768)
+    if loader then
+        loader.Clip[1] = clipPath
+        
+        -- Set the loader as active tool
+        comp:SetActiveTool(loader)
+        
+        -- Run the adjustment script for all sequence file types
+        if fileType == "sequence" then
+            comp:RunScript("Config:/ControlDrop/ControlDropAdjust.lua")
+        end
+        
+        -- Wait a bit for the loader to be fully initialized
+        bmd.wait(0.05)
+        return true
+    end
+    return false
+end
+
+-- Find sequence files in a directory
+function FindSequenceFiles(dirContents)
+    local sequenceGroups = {}
+    
+    -- Collect all potential sequence files
+    for _, info in pairs(dirContents) do
+        if type(info) == "table" and not info.IsDir then
+            local name = info.Name
+            if IsSequenceFile(name) then
+                -- Extract the base name (without frame number)
+                local baseName = name:match("(.+)%.[^%.]+%.[^%.]+$") or name:match("(.+)_%d+%.[^%.]+$")
+                if baseName then
+                    if not sequenceGroups[baseName] then
+                        sequenceGroups[baseName] = {}
+                    end
+                    table.insert(sequenceGroups[baseName], name)
+                end
+            end
+        end
+    end
+    
+    -- Sort each group and return the first frame of each sequence
+    local firstFrames = {}
+    for _, frames in pairs(sequenceGroups) do
+        if #frames > 0 then
+            table.sort(frames)
+            table.insert(firstFrames, frames[1])
+        end
+    end
+    
+    return firstFrames
+end
+
+-- Check if a directory contains sequences
+function HandleFolderSequence(comp, folderPath)
+    local dirContents = bmd.readdir(folderPath .. "/*")
+    if not dirContents then 
+        return false 
+    end
+
+    local handled = false
+    
+    -- Find all sequence files in this directory
+    local sequenceFiles = FindSequenceFiles(dirContents)
+    
+    -- Create loaders for each sequence found
+    for _, firstFile in ipairs(sequenceFiles) do
+        local imagePath = folderPath .. "/" .. firstFile
+        if CreateLoader(comp, imagePath, "sequence") then
+            handled = true
+            -- Add a small delay between creating loaders
+            bmd.wait(0.05)
+        end
+    end
+    
+    -- Check subdirectories for sequences
+    for _, info in pairs(dirContents) do
+        if type(info) == "table" and info.IsDir and not info.Name:match("^%.") then
+            local subfolderPath = folderPath .. "/" .. info.Name
+            if HandleFolderSequence(comp, subfolderPath) then
+                handled = true
+            end
+        end
+    end
+    
+    return handled
+end
+
+-- Handle a single file (sequence or not)
+function HandleSingleFile(comp, filePath)
+    -- Extract just the filename from the path
+    local filename = filePath:match("([^/\\]+)$") or filePath
+    local ext = GetFileExtension(filename)
+    
+    if movieext[ext] then
+        return CreateLoader(comp, filePath, "movie")
+    elseif seqext[ext] then
+        -- For sequence files, use sequence type to trigger the adjustment script
+        local fileType = "sequence"
+        if IsSequenceFile(filename) then
+            fileType = "sequence"
+        else
+            fileType = "single"
+        end
+        return CreateLoader(comp, filePath, fileType)
+    end
+    
+    -- For unsupported file types, return false to let Fusion handle them
+    return false
+end
+
+-- Check if path is a directory
+function IsDirectory(path)
+    -- First check if the file exists
+    local fileInfo = bmd.fileexists(path)
+    if not fileInfo then
+        return false
+    end
+    
+    -- Check if it's a directory by trying to read its contents
+    -- and also checking if it has an extension (directories typically don't)
+    local hasExtension = path:match("%.%w+$") ~= nil
+    
+    if hasExtension then
+        return false
+    end
+    
+    local dirContents = bmd.readdir(path .. "/*")
+    if dirContents then
+        return true
+    else
+        return false
+    end
+end
+
+-- Main function to handle drag and drop
+function Main()
+    -- Call other chained events and default action
+    rets = self:Default(ctx, args)
+    
+    -- Check if Control key is pressed using fusion:GetModifiers()
+    local modifiers = fusion:GetModifiers()
+    
+    -- Only run our custom handling if Control key is pressed
+    if modifiers and modifiers.ControlModifier then   
+        if not rets.handled then
+            local comp = fusion.CurrentComp
+            if comp then
+                comp:Lock()
+                
+                local anyHandled = false
+                
+                -- Process files one by one with a small delay between them
+                for i, file in ipairs(args.urilist) do
+                    if i > 1 then
+                        -- Add a small delay between processing multiple files
+                        bmd.wait(0.02)
+                    end
+                    
+                    -- Check if it's a directory or a file
+                    if IsDirectory(file) then
+                        -- Handle directories that contain sequences
+                        if HandleFolderSequence(comp, file) then
+                            anyHandled = true
+                        end
+                    else
+                        -- Handle any file (sequence or not)
+                        if HandleSingleFile(comp, file) then
+                            anyHandled = true
+                        end
+                    end
+                end
+                
+                comp:Unlock()
+                
+                if anyHandled then
+                    rets.handled = true
+                end
+            end
+        end
+    end
+    
+    return rets
+end
+
+-- Run the main function
+Main()
+
+]=],
+            },
+        },
+    },
+}

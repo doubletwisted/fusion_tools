@@ -1,0 +1,26 @@
+Atom {
+	Name = "ControlDrop",
+	Category = "DragDrop",
+	Author = "Dominik Bargiel",
+	Version = 1.0,
+	Date = {2025, 3, 15},
+	Description = [[<h2>Hold CTRL while dragging files/folders to Flow to:</h2>
+<ul>
+  <li>Scan all folders, subfolders, and nested directories for media</li>
+  <li>Create Loaders for all found sequences and movie files</li>
+  <li>Automatically set each Loader's GlobalIn to match the frame number in filenames</li>
+</ul>
+
+
+Normal drag & drop behavior remains unchanged when not holding CTRL.
+]],
+	Donation = {
+		URL = [[paypal.me/dominikbargiel]],
+		Amount = "1",
+	},
+
+	Deploy = {
+		"Config/ControlDrop/ControlDrop.fu",
+		"Config/ControlDrop/ControlDropAdjust.lua",
+	},
+}

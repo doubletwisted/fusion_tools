@@ -1,0 +1,257 @@
+{
+    Action {
+        ID = "ViewerToClipboard_Copy",
+        Category = "Viewer",
+        ShortName = "Copy View",
+
+        Targets = {
+            GLView = {
+                Execute = _Lua [=[
+                    local DEBUG = false
+                    local actionStartedAt = bmd and bmd.getuptime and bmd.getuptime() or nil
+                    local requestId = os.date("%H%M%S") .. "-" ..
+                        string.format("%06d", math.floor((os.clock() % 1) * 1000000))
+                    local mapper = app or fusion or fu
+                    local function writeLog(message)
+                        if not DEBUG then
+                            return
+                        end
+
+                        local text = "[ViewerToClipboard] [" .. requestId .. "] " .. tostring(message)
+                        print(text)
+
+                        if mapper ~= nil then
+                            local ok, path = pcall(function()
+                                return mapper:MapPath("Temp:/fusion_viewer_to_clipboard_summary.log")
+                            end)
+
+                            if ok and path ~= nil then
+                                local file = io.open(path, "a")
+                                if file ~= nil then
+                                    file:write(os.date("%Y-%m-%d %H:%M:%S") .. " " .. text .. "\n")
+                                    file:close()
+                                end
+                            end
+                        end
+                    end
+
+                    writeLog("Copy hotkey: target=GLView currentViewer=" ..
+                        tostring(obj and obj.CurrentViewer ~= nil))
+
+                    local previousTarget = rawget(_G, "ViewerToClipboardTarget")
+                    ViewerToClipboardTarget = {
+                        label = "Focused viewer",
+                        view = obj,
+                        viewer = obj and obj.CurrentViewer or nil,
+                        requestId = requestId,
+                        actionStartedAt = actionStartedAt,
+                    }
+
+                    if mapper == nil then
+                        writeLog("No app/fusion/fu mapper available in GLView action")
+                        ViewerToClipboardTarget = previousTarget
+                        return
+                    end
+
+                    local scriptPath = mapper:MapPath("Config:/ViewerToClipboard/ViewerToClipboard.lua")
+                    local chunk, err = loadfile(scriptPath)
+                    if not chunk then
+                        writeLog("Could not load script: " .. tostring(err))
+                    else
+                        ViewerToClipboardTarget.scriptStartedAt =
+                            bmd and bmd.getuptime and bmd.getuptime() or nil
+                        local ok, runErr = pcall(chunk)
+                        if not ok then
+                            writeLog("Script failed: " .. tostring(runErr))
+                        end
+                    end
+
+                    ViewerToClipboardTarget = previousTarget
+                ]=],
+            },
+
+            GLImageViewer = {
+                Execute = _Lua [=[
+                    local DEBUG = false
+                    local actionStartedAt = bmd and bmd.getuptime and bmd.getuptime() or nil
+                    local requestId = os.date("%H%M%S") .. "-" ..
+                        string.format("%06d", math.floor((os.clock() % 1) * 1000000))
+                    local mapper = app or fusion or fu
+                    local function writeLog(message)
+                        if not DEBUG then
+                            return
+                        end
+
+                        local text = "[ViewerToClipboard] [" .. requestId .. "] " .. tostring(message)
+                        print(text)
+
+                        if mapper ~= nil then
+                            local ok, path = pcall(function()
+                                return mapper:MapPath("Temp:/fusion_viewer_to_clipboard_summary.log")
+                            end)
+
+                            if ok and path ~= nil then
+                                local file = io.open(path, "a")
+                                if file ~= nil then
+                                    file:write(os.date("%Y-%m-%d %H:%M:%S") .. " " .. text .. "\n")
+                                    file:close()
+                                end
+                            end
+                        end
+                    end
+
+                    writeLog("Copy hotkey: target=GLImageViewer viewerAvailable=" ..
+                        tostring(obj ~= nil))
+
+                    local previousTarget = rawget(_G, "ViewerToClipboardTarget")
+                    ViewerToClipboardTarget = {
+                        label = "Focused image viewer",
+                        view = nil,
+                        viewer = obj,
+                        requestId = requestId,
+                        actionStartedAt = actionStartedAt,
+                    }
+
+                    if mapper == nil then
+                        writeLog("No app/fusion/fu mapper available in GLImageViewer action")
+                        ViewerToClipboardTarget = previousTarget
+                        return
+                    end
+
+                    local scriptPath = mapper:MapPath("Config:/ViewerToClipboard/ViewerToClipboard.lua")
+                    local chunk, err = loadfile(scriptPath)
+                    if not chunk then
+                        writeLog("Could not load script: " .. tostring(err))
+                    else
+                        ViewerToClipboardTarget.scriptStartedAt =
+                            bmd and bmd.getuptime and bmd.getuptime() or nil
+                        local ok, runErr = pcall(chunk)
+                        if not ok then
+                            writeLog("Script failed: " .. tostring(runErr))
+                        end
+                    end
+
+                    ViewerToClipboardTarget = previousTarget
+                ]=],
+            },
+        },
+    },
+
+    Action {
+        ID = "ViewerToClipboard_NotViewer",
+        Category = "Viewer",
+        ShortName = "Copy View Focus Warning",
+
+        Targets = {
+            FuFrame = {
+                Execute = _Lua [=[
+                    print("[ViewerToClipboard] Shift+Ctrl+C was received, but Fusion focus is not on a 2D viewer. Click inside the viewer image area and try again.")
+                ]=],
+            },
+
+            FlowView = {
+                Execute = _Lua [=[
+                    print("[ViewerToClipboard] Shift+Ctrl+C was received, but Fusion focus is on the flow, not the viewer. Click inside the viewer image area and try again.")
+                ]=],
+            },
+
+            GL3DViewer = {
+                Execute = _Lua [=[
+                    print("[ViewerToClipboard] Shift+Ctrl+C was received in a 3D viewer. This tool currently copies 2D viewer images only.")
+                ]=],
+            },
+        },
+    },
+
+    Action {
+        ID = "ViewerToClipboard_Paste",
+        Category = "Viewer",
+        ShortName = "Paste Clipboard Image as Loader",
+
+        Targets = {
+            FlowView = {
+                Execute = _Lua [=[
+                    local DEBUG = false
+                    local requestId = os.date("%H%M%S") .. "-" ..
+                        string.format("%06d", math.floor((os.clock() % 1) * 1000000))
+                    local mapper = app or fusion or fu
+                    local function writeLog(message)
+                        if not DEBUG then
+                            return
+                        end
+
+                        local text = "[ViewerToClipboard] [" .. requestId .. "] " .. tostring(message)
+                        print(text)
+
+                        if mapper ~= nil then
+                            local ok, path = pcall(function()
+                                return mapper:MapPath("Temp:/fusion_viewer_to_clipboard_summary.log")
+                            end)
+
+                            if ok and path ~= nil then
+                                local file = io.open(path, "a")
+                                if file ~= nil then
+                                    file:write(os.date("%Y-%m-%d %H:%M:%S") .. " " .. text .. "\n")
+                                    file:close()
+                                end
+                            end
+                        end
+                    end
+
+                    writeLog("FlowView paste action fired")
+
+                    if mapper == nil then
+                        writeLog("No app/fusion/fu mapper available in FlowView paste action")
+                        return
+                    end
+
+                    local previousMode = rawget(_G, "ViewerToClipboardMode")
+                    ViewerToClipboardMode = "paste"
+
+                    local scriptPath = mapper:MapPath("Config:/ViewerToClipboard/ViewerToClipboard.lua")
+                    local chunk, err = loadfile(scriptPath)
+                    if not chunk then
+                        writeLog("Could not load script: " .. tostring(err))
+                    else
+                        local ok, runErr = pcall(chunk)
+                        if not ok then
+                            writeLog("Script failed: " .. tostring(runErr))
+                        end
+                    end
+
+                    ViewerToClipboardMode = previousMode
+                ]=],
+            },
+        },
+    },
+
+    Hotkeys {
+        Target = "GLView",
+        SHIFT_CONTROL_C = "ViewerToClipboard_Copy{}",
+    },
+
+    Hotkeys {
+        Target = "GLImageViewer",
+        SHIFT_CONTROL_C = "ViewerToClipboard_Copy{}",
+    },
+
+    Hotkeys {
+        Target = "FuFrame",
+        SHIFT_CONTROL_C = "ViewerToClipboard_NotViewer{}",
+    },
+
+    Hotkeys {
+        Target = "FlowView",
+        SHIFT_CONTROL_C = "ViewerToClipboard_NotViewer{}",
+    },
+
+    Hotkeys {
+        Target = "GL3DViewer",
+        SHIFT_CONTROL_C = "ViewerToClipboard_NotViewer{}",
+    },
+
+    Hotkeys {
+        Target = "FlowView",
+        CONTROL_V = "ViewerToClipboard_Paste{}",
+    },
+}

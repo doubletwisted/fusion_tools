@@ -1,0 +1,85 @@
+--[[--
+Expression Editor HUD - v1.0
+by Dominik Bargiel dominikbargiel97@gmail.com
+-------------------------------------------------------------------------------
+Copyright Notice:
+-------------------------------------------------------------------------------
+This script is part of WSL (We Suck Less) tools collection.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, subject to
+the following conditions:
+
+1. The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+   
+2. Distribution is restricted to:
+   - WSL Reactor package manager
+   - We Suck Less forum (www.steakunderwater.com)
+   - The author's GitHub repository (github.com/doubletwisted/fusion_tools)
+
+Any other distribution or sharing of this script outside of these channels
+requires explicit permission from the author.
+
+Copyright © 2025 Dominik Bargiel
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Description:
+-------------------------------------------------------------------------------
+A tool that displays and allows editing of expressions attached to the selected node.
+Features include:
+- Syntax highlighting for Fusion expressions
+- Dynamic pagination for handling many expressions
+- Automatic text field height adjustment
+- Adjustable font size
+- Copy/Paste functionality
+- Expression removal with Alt key modifier
+- Status bar with helpful information
+
+TODO:
+- some kind of preset systemn
+- window remember it's size and position 
+
+
+Tips & Shortcuts 
+- Press "E" to open the window for active node
+- ALT will change the mode to REMOVE 
+- Ctrl+W or Escape or Ctrl+F4 - Close the window 
+
+-------------------------------------------------------------------------------
+Version History:
+-------------------------------------------------------------------------------
+v1.0 - 2025-04-05
+    - Initial release
+--]]--
+
+{
+    Action {
+        ID = "ExpressionEditor_Show",
+        Name = "Expression Editor",
+        Visible = true,
+
+        Args = {},
+
+        Targets = {
+            Composition = {
+                Execute = [[
+print("[ExpressionEditor] Action triggered")
+
+-- Call our script with mouse position as direct arguments
+target:RunScript("$CFG/ExpressionEditorHUD.lua", {mousex = args._sxpos, mousey = args._sypos})
+]],
+            },
+        },
+    },
+
+    Hotkeys {
+        Target = "FlowView",
+        E = "ExpressionEditor_Show",
+    },
+} 
+

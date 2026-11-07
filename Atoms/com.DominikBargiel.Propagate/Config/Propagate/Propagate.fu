@@ -1,0 +1,25 @@
+{
+    Action {
+        ID = "Propagate_Selected",
+        Name = "Propagate Parameters",
+        Visible = false, -- No need for a menu item
+
+        Args = {},
+
+        Targets = {
+            Composition = {
+                Execute = [[
+print("[Propagate] Action triggered")
+-- Call the Lua script to handle the logic
+target:RunScript("$CFG/Propagate.lua", {mousex = args._sxpos, mousey = args._sypos})
+]],
+            },
+        },
+    },
+
+    Hotkeys {
+        Target = "FlowView",
+        I = "Propagate_Selected", 
+    },
+} 
+

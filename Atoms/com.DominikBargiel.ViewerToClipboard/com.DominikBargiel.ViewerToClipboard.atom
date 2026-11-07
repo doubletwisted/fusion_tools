@@ -1,0 +1,42 @@
+Atom {
+	Name = "Viewer To Clipboard",
+	Category = "Scripts/Utility",
+	Author = "Dominik Bargiel",
+	Version = 1.1,
+	Date = {2026, 7, 23},
+	Description = [[<h1>Viewer To Clipboard for Fusion and Resolve</h1>
+
+<p>Copies the focused Fusion 2D viewer image directly to the Windows clipboard using a <strong>Shift+Ctrl+C</strong> hotkey, and pastes images from the clipboard into the Flow as Loaders with <strong>Ctrl+V</strong>.</p>
+
+<h2>Key Features:</h2>
+<ul>
+  <li><strong>Focused Viewer Capture</strong> - Copies the viewer currently under focus</li>
+  <li><strong>Windows Clipboard Support</strong> - Publishes PNG, image/png, and DIBV5 clipboard formats</li>
+  <li><strong>PNG Source Copy</strong> - Saves the viewer frame as a PNG before copying</li>
+  <li><strong>Paste as Loader</strong> - Ctrl+V in the Flow turns a copied image or image file into a Loader; anything else pastes as usual</li>
+  <li><strong>Focus Warnings</strong> - Prints helpful messages when the hotkey is used outside a 2D viewer</li>
+</ul>
+
+<h2>How to Use:</h2>
+<ol>
+  <li>Click inside a Fusion 2D viewer image area</li>
+  <li>Press <strong>Shift+Ctrl+C</strong></li>
+  <li>Paste the copied image into another Windows application</li>
+</ol>
+<p>To bring an image in, copy it in any application (or copy an image file in Explorer), click the Flow and press <strong>Ctrl+V</strong>.</p>
+
+<h2>Notes:</h2>
+<ul>
+  <li>Requires Windows because it uses the Windows clipboard API</li>
+  <li>A PNG copy is written to a <strong>clipboard</strong> folder near the composition, with temp-folder fallback</li>
+</ul>]],
+	Donation = {
+		URL = [[paypal.me/dominikbargiel]],
+		Amount = "1",
+	},
+
+	Deploy = {
+		"Config/ViewerToClipboard/ViewerToClipboard.fu",
+		"Config/ViewerToClipboard/ViewerToClipboard.lua",
+	},
+}

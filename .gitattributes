@@ -1,0 +1,7 @@
+* text=auto
+*.atom     text eol=crlf
+*.lua      text eol=crlf
+*.fu       text eol=crlf
+*.fuse     text eol=crlf
+*.setting  text eol=crlf
+*.png      binary

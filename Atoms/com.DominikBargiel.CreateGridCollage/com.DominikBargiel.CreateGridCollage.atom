@@ -1,0 +1,16 @@
+Atom {
+	Name = "Create Grid Collage",
+	Category = "Scripts",
+	Author = "Dominik Bargiel",
+	Version = 1.3,
+	Date = {2026, 6, 18},
+	Description = [[Create Grid Collage creates a grid collage of selected Loaders with a chosen number of rows and columns and the width for each image. It uses merges to build the grid and overlays each image's filename using the Text+ tool. It has options for sorting (original, alphabetical, reverse), spacing, text color, fitting tall images into the tile, and building a clean reference block of copied Loaders next to the flow so the original Loaders stay untouched.]],
+	Donation = {
+		URL = [[paypal.me/dominikbargiel]],
+		Amount = "1",
+	},
+
+	Deploy = {
+		"Scripts/Comp/Dominik Bargiel/Create_Grid_Collage.lua",
+	},
+}
